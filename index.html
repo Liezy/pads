@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Worship Pads By Eliézer Alencar</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0d0d0d;
+    color: white;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 20px 0;
+  }
+
+  h2 {
+    margin-top: 30px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding: 20px;
+  }
+
+  button {
+    height: 90px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    background: #1f1f1f;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  button:hover {
+    background: #333;
+  }
+
+  button.active {
+    background: #4caf50;
+  }
+
+  .minor {
+    background: #2a1f3d;
+  }
+
+  .stop {
+    background: #b71c1c;
+    margin: 20px;
+    width: 90%;
+    height: 60px;
+  }
+</style>
+
+</head>
+<body>
+
+<h1>🎹 Worship Pads</h1>
+
+<h2>Maiores</h2>
+<div class="grid" id="majorGrid"></div>
+
+<button class="stop" onclick="stopPad()">⛔ Parar</button>
+
+<script>
+let currentAudio = null;
+let currentButton = null;
+let audios = {}; // armazenar todos os áudios pré-carregados
+
+// TODOS OS TONS
+const notes = [
+  "C","C#","D","D#","E","F",
+  "F#","G","G#","A","A#","B"
+];
+
+// mapear notas para nomes de arquivos
+function getNoteFileName(note) {
+  return note.replace(/#/g, 's');
+}
+
+// pré-carregar todos os áudios
+notes.forEach(note => {
+  const fileName = getNoteFileName(note);
+  const audio = new Audio("audios/pad_" + fileName + ".mp3");
+  audio.loop = true;
+  audio.volume = 1;
+  audios[fileName] = audio;
+});
+
+// gerar pads maiores
+const majorGrid = document.getElementById("majorGrid");
+notes.forEach(note => {
+  const btn = document.createElement("button");
+  btn.innerText = note;
+  btn.onclick = () => playPad(getNoteFileName(note), btn);
+  majorGrid.appendChild(btn);
+});
+
+function playPad(fileName, btn) {
+  // remover destaque do botão anterior
+  if (currentButton) {
+    currentButton.classList.remove("active");
+  }
+
+  // parar áudio anterior
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+  }
+
+  // reproduzir áudio pré-carregado
+  currentAudio = audios[fileName];
+  currentAudio.play().catch(error => {
+    if (error.name !== 'NotAllowedError') {
+      console.error("Erro ao tocar " + fileName + ":", error);
+    }
+  });
+
+  btn.classList.add("active");
+  currentButton = btn;
+}
+
+function stopPad() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+  }
+
+  if (currentButton) {
+    currentButton.classList.remove("active");
+  }
+
+  currentAudio = null;
+  currentButton = null;
+}
+</script>
+
+</body>
+</html>

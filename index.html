@@ -2,144 +2,653 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Worship Pads By Eliézer Alencar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Worship Pads — Eliézer Alencar</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 
 <style>
-  body {
+  /* ===== RESET & VARIÁVEIS ===== */
+  *, *::before, *::after {
+    box-sizing: border-box;
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: #0d0d0d;
-    color: white;
+    padding: 0;
+  }
+
+  :root {
+    --bg:           #080b12;
+    --surface:      #0f1523;
+    --surface-2:    #151d30;
+    --border:       rgba(100, 130, 200, 0.12);
+    --accent:       #5b8dee;
+    --accent-glow:  rgba(91, 141, 238, 0.35);
+    --active:       #6ee7b7;
+    --active-glow:  rgba(110, 231, 183, 0.4);
+    --text:         #e2e8f0;
+    --text-muted:   #64748b;
+    --radius:       14px;
+    --transition:   0.22s ease;
+    --fade-dur:     0.6s;
+  }
+
+  html { font-size: 16px; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(91,141,238,0.08) 0%, transparent 70%);
+  }
+
+  /* ===== HEADER ===== */
+  header {
     text-align: center;
+    margin-bottom: 32px;
+    width: 100%;
+    max-width: 680px;
   }
 
-  h1 {
-    margin: 20px 0;
+  header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.5rem, 5vw, 2.4rem);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    background: linear-gradient(135deg, #a5b4fc 0%, #6ee7b7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
   }
 
-  h2 {
-    margin-top: 30px;
+  header p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
+  /* ===== APP CARD ===== */
+  .app-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 28px 20px;
+    width: 100%;
+    max-width: 680px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  }
+
+  /* ===== CONTROLE DE VOLUME ===== */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding: 14px 18px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .controls label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  #volumeSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(
+      to right,
+      var(--accent) 0%,
+      var(--accent) calc(var(--vol, 100) * 1%),
+      rgba(100,130,200,0.2) calc(var(--vol, 100) * 1%),
+      rgba(100,130,200,0.2) 100%
+    );
+    outline: none;
+    cursor: pointer;
+    transition: height var(--transition);
+  }
+
+  #volumeSlider:hover { height: 6px; }
+
+  #volumeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+    cursor: pointer;
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+
+  #volumeSlider::-webkit-slider-thumb:hover {
+    transform: scale(1.25);
+    box-shadow: 0 0 14px var(--accent-glow);
+  }
+
+  #volumeSlider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+    cursor: pointer;
+  }
+
+  #volumeDisplay {
+    font-size: 0.78rem;
+    color: var(--accent);
+    min-width: 36px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ===== LABELS DE SEÇÃO ===== */
+  .section-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-left: 2px;
+  }
+
+  /* ===== GRID — MOBILE-FIRST ===== */
+  /* 3 colunas (< 480px) → 4 colunas (≥ 480px) → 6 colunas (≥ 600px) */
   .grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    padding: 20px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
   }
 
-  button {
-    height: 90px;
-    font-size: 18px;
-    border-radius: 10px;
-    border: none;
-    background: #1f1f1f;
-    color: white;
+  @media (min-width: 480px) {
+    .grid { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  @media (min-width: 600px) {
+    .grid { grid-template-columns: repeat(6, 1fr); }
+  }
+
+  /* ===== BOTÕES DE PAD ===== */
+  .pad-btn {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 72px;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-muted);
     cursor: pointer;
-    transition: 0.2s;
+    transition:
+      background var(--transition),
+      color var(--transition),
+      border-color var(--transition),
+      box-shadow var(--transition),
+      transform 0.1s ease;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
 
-  button:hover {
-    background: #333;
+  /* Camada de ripple ao clicar */
+  .pad-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
   }
 
-  button.active {
-    background: #4caf50;
+  /* Barra de pulse na base do botão ativo */
+  .pad-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 0%;
+    border-radius: 0 0 var(--radius) var(--radius);
+    background: var(--active);
+    transition: width 0.3s ease;
+    pointer-events: none;
   }
 
-  .minor {
-    background: #2a1f3d;
+  .pad-btn:hover {
+    background: #1c2540;
+    border-color: rgba(100,130,200,0.25);
+    color: var(--text);
   }
 
-  .stop {
-    background: #b71c1c;
-    margin: 20px;
-    width: 90%;
-    height: 60px;
+  .pad-btn:active { transform: scale(0.95); }
+
+  /* Ripple animado ao clicar */
+  .pad-btn.clicked::before {
+    opacity: 1;
+    animation: ripple-fade 0.4s ease forwards;
+  }
+
+  @keyframes ripple-fade {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
+
+  /* Estado ativo (tocando) */
+  .pad-btn.active {
+    background: rgba(110, 231, 183, 0.1);
+    border-color: rgba(110, 231, 183, 0.45);
+    color: var(--active);
+    box-shadow: 0 0 20px rgba(110, 231, 183, 0.15), inset 0 0 12px rgba(110,231,183,0.05);
+  }
+
+  .pad-btn.active::after {
+    width: 100%;
+    animation: pulse-bar 2.4s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse-bar {
+    from { opacity: 0.6; }
+    to   { opacity: 1;   }
+  }
+
+  /* ===== BOTÃO PARAR ===== */
+  .stop-btn {
+    width: 100%;
+    min-height: 52px;
+    margin-top: 8px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: var(--radius);
+    border: 1px solid rgba(239,68,68,0.3);
+    background: rgba(239,68,68,0.08);
+    color: #f87171;
+    cursor: pointer;
+    transition: background var(--transition), box-shadow var(--transition), transform 0.1s ease;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .stop-btn:hover {
+    background: rgba(239,68,68,0.16);
+    box-shadow: 0 0 18px rgba(239,68,68,0.2);
+  }
+
+  .stop-btn:active { transform: scale(0.98); }
+
+  /* ===== STATUS BAR ===== */
+  .status-bar {
+    margin-top: 20px;
+    padding: 10px 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    transition: color var(--transition);
+  }
+
+  .status-bar .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    flex-shrink: 0;
+    transition: background var(--transition), box-shadow var(--transition);
+  }
+
+  .status-bar.playing .dot {
+    background: var(--active);
+    box-shadow: 0 0 6px var(--active-glow);
+    animation: blink 1.4s ease-in-out infinite;
+  }
+
+  .status-bar.playing { color: var(--active); }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1;   }
+    50%       { opacity: 0.4; }
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    margin-top: 28px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    opacity: 0.5;
   }
 </style>
-
 </head>
 <body>
 
-<h1>🎹 Worship Pads</h1>
+<header>
+  <h1>✦ Worship Pads</h1>
+  <p>by Eliézer Alencar</p>
+</header>
 
-<h2>Maiores</h2>
-<div class="grid" id="majorGrid"></div>
+<main class="app-card" role="main">
 
-<button class="stop" onclick="stopPad()">⛔ Parar</button>
+  <!-- Controle de volume global -->
+  <div class="controls" aria-label="Controles">
+    <label for="volumeSlider">Vol</label>
+    <input
+      type="range"
+      id="volumeSlider"
+      min="0" max="100" value="100"
+      aria-label="Volume global"
+      style="--vol: 100"
+    >
+    <span id="volumeDisplay" aria-live="polite">100%</span>
+  </div>
+
+  <!-- Grid de pads gerado via JS -->
+  <p class="section-label">Notas</p>
+  <div class="grid" id="padGrid" role="group" aria-label="Pads de adoração"></div>
+
+  <!-- Parar -->
+  <button class="stop-btn" id="stopBtn" type="button" aria-label="Parar reprodução">
+    ⬛ Parar
+  </button>
+
+  <!-- Status em tempo real -->
+  <div class="status-bar" id="statusBar" aria-live="polite" aria-atomic="true">
+    <span class="dot"></span>
+    <span id="statusText">Nenhum pad ativo</span>
+  </div>
+
+</main>
+
+<footer>Worship Pads © 2025 — Apenas para uso ministerial</footer>
 
 <script>
-let currentAudio = null;
-let currentButton = null;
-let audios = {}; // armazenar todos os áudios pré-carregados
+/* =============================================================
+   WORSHIP PADS — Versão otimizada
+   Técnicas utilizadas:
+   • Web Audio API (AudioContext + GainNode) para fade preciso
+   • Fetch + decodeAudioData para pré-carregamento eficiente
+   • AudioContext criado apenas após interação (Autoplay Policy)
+   • Fade-in / Fade-out via linearRampToValueAtTime
+   • Volume global separado do fade (nó mestre independente)
+   • Grid mobile-first com CSS Grid responsivo
+   • IIFE para escopo limpo, sem poluição global
+   ============================================================= */
 
-// TODOS OS TONS
-const notes = [
-  "C","C#","D","D#","E","F",
-  "F#","G","G#","A","A#","B"
-];
+(function () {
+  'use strict';
 
-// mapear notas para nomes de arquivos
-function getNoteFileName(note) {
-  return note.replace(/#/g, 's');
-}
+  // ─────────────────────────────────────────────
+  // CONFIGURAÇÃO — edite aqui para adicionar notas
+  // Basta inserir mais entradas em NOTES e colocar
+  // o arquivo correspondente em audios/pad_<nome>.mp3
+  // ─────────────────────────────────────────────
+  const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  const AUDIO_BASE = 'audios/';
+  const FADE_IN  = 0.8;   // segundos de fade-in ao iniciar pad
+  const FADE_OUT = 0.9;   // segundos de fade-out ao trocar/parar pad
 
-// pré-carregar todos os áudios
-notes.forEach(note => {
-  const fileName = getNoteFileName(note);
-  const audio = new Audio("audios/pad_" + fileName + ".mp3");
-  audio.loop = true;
-  audio.volume = 1;
-  audios[fileName] = audio;
-});
+  // ─────────────────────────────────────────────
+  // ESTADO
+  // ─────────────────────────────────────────────
+  let audioCtx       = null;  // Web AudioContext
+  let masterGain     = null;  // GainNode controlado pelo slider
+  let currentNote    = null;  // nota tocando agora
+  let activeSource   = null;  // AudioBufferSourceNode ativo
+  let activeFadeGain = null;  // GainNode de fade do pad ativo
+  let audioBuffers   = {};    // cache: fileName → AudioBuffer (ou {raw})
+  let globalVolume   = 1.0;
 
-// gerar pads maiores
-const majorGrid = document.getElementById("majorGrid");
-notes.forEach(note => {
-  const btn = document.createElement("button");
-  btn.innerText = note;
-  btn.onclick = () => playPad(getNoteFileName(note), btn);
-  majorGrid.appendChild(btn);
-});
+  // ─────────────────────────────────────────────
+  // UTILITÁRIOS
+  // ─────────────────────────────────────────────
 
-function playPad(fileName, btn) {
-  // remover destaque do botão anterior
-  if (currentButton) {
-    currentButton.classList.remove("active");
+  /** C# → Cs (nome seguro para arquivo) */
+  function toFileName(note) {
+    return note.replace(/#/g, 's');
   }
 
-  // parar áudio anterior
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
-  }
-
-  // reproduzir áudio pré-carregado
-  currentAudio = audios[fileName];
-  currentAudio.play().catch(error => {
-    if (error.name !== 'NotAllowedError') {
-      console.error("Erro ao tocar " + fileName + ":", error);
+  /**
+   * Cria o AudioContext na primeira interação real do usuário.
+   * Garante conformidade com a Autoplay Policy de todos os navegadores.
+   */
+  function ensureAudioContext() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = globalVolume;
+      masterGain.connect(audioCtx.destination);
     }
-  });
-
-  btn.classList.add("active");
-  currentButton = btn;
-}
-
-function stopPad() {
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
+    // iOS Safari suspende o ctx se a página ficar em background
+    if (audioCtx.state === 'suspended') audioCtx.resume();
   }
 
-  if (currentButton) {
-    currentButton.classList.remove("active");
+  // ─────────────────────────────────────────────
+  // PRÉ-CARREGAMENTO EFICIENTE
+  // ─────────────────────────────────────────────
+
+  /**
+   * Faz fetch do arquivo e guarda como ArrayBuffer raw.
+   * A decodificação só ocorre no primeiro play (quando ctx existe).
+   * Isso evita manter múltiplos AudioBuffers na memória antes do uso.
+   */
+  async function preloadAudio(note) {
+    const fn = toFileName(note);
+    if (audioBuffers[fn]) return;
+    try {
+      const res = await fetch(AUDIO_BASE + 'pad_' + fn + '.mp3');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      audioBuffers[fn] = { raw: await res.arrayBuffer() };
+    } catch (e) {
+      console.warn('[WP] Falha ao pré-carregar', fn, '–', e.message);
+    }
   }
 
-  currentAudio = null;
-  currentButton = null;
-}
+  /**
+   * Retorna um AudioBuffer pronto para uso.
+   * Decodifica o raw ArrayBuffer caso ainda não tenha sido decodificado.
+   */
+  async function getBuffer(note) {
+    const fn = toFileName(note);
+    const entry = audioBuffers[fn];
+    if (!entry) return null;
+    if (entry instanceof AudioBuffer) return entry;
+    if (entry.raw) {
+      try {
+        const decoded = await audioCtx.decodeAudioData(entry.raw);
+        audioBuffers[fn] = decoded; // substitui raw pelo AudioBuffer
+        return decoded;
+      } catch (e) {
+        console.error('[WP] Erro ao decodificar', fn, e);
+        return null;
+      }
+    }
+    return null;
+  }
+
+  // ─────────────────────────────────────────────
+  // REPRODUÇÃO
+  // ─────────────────────────────────────────────
+
+  /** Toca um pad com fade-in; aplica fade-out no pad anterior */
+  async function playPad(note, btn) {
+    ensureAudioContext();
+
+    // Evita restart se clicar no pad que já está tocando
+    if (note === currentNote && activeSource) return;
+
+    const buffer = await getBuffer(note);
+    if (!buffer) {
+      console.warn('[WP] Buffer indisponível para', note);
+      return;
+    }
+
+    // Fade-out do pad anterior (não bloqueia a interface)
+    if (activeSource && activeFadeGain) {
+      fadeOutAndStop(activeSource, activeFadeGain);
+    }
+
+    // Atualiza visual
+    document.querySelectorAll('.pad-btn.active').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    triggerRipple(btn);
+
+    // Cria nós de áudio: source → fadeGain → masterGain → speakers
+    const source   = audioCtx.createBufferSource();
+    const fadeGain = audioCtx.createGain();
+    source.buffer  = buffer;
+    source.loop    = true;
+    source.connect(fadeGain);
+    fadeGain.connect(masterGain);
+
+    // Fade-in suave
+    const now = audioCtx.currentTime;
+    fadeGain.gain.setValueAtTime(0, now);
+    fadeGain.gain.linearRampToValueAtTime(1, now + FADE_IN);
+    source.start(now);
+
+    // Persiste referências
+    activeSource   = source;
+    activeFadeGain = fadeGain;
+    currentNote    = note;
+
+    updateStatus(true, note);
+  }
+
+  /** Aplica fade-out e para a fonte após a conclusão */
+  function fadeOutAndStop(source, gainNode) {
+    const now = audioCtx.currentTime;
+    gainNode.gain.cancelScheduledValues(now);
+    gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+    gainNode.gain.linearRampToValueAtTime(0, now + FADE_OUT);
+    try { source.stop(now + FADE_OUT + 0.05); } catch (_) {}
+  }
+
+  /** Para tudo com fade-out suave */
+  function stopAll() {
+    if (!activeSource) return;
+    ensureAudioContext();
+    fadeOutAndStop(activeSource, activeFadeGain);
+    activeSource   = null;
+    activeFadeGain = null;
+    currentNote    = null;
+    document.querySelectorAll('.pad-btn.active').forEach(b => b.classList.remove('active'));
+    updateStatus(false);
+  }
+
+  // ─────────────────────────────────────────────
+  // HELPERS DE UI
+  // ─────────────────────────────────────────────
+
+  /** Dispara micro-animação de ripple no botão */
+  function triggerRipple(btn) {
+    btn.classList.remove('clicked');
+    void btn.offsetWidth; // força reflow para reiniciar animação CSS
+    btn.classList.add('clicked');
+    btn.addEventListener('animationend', () => btn.classList.remove('clicked'), { once: true });
+  }
+
+  /** Atualiza barra de status inferior */
+  function updateStatus(playing, note) {
+    const bar  = document.getElementById('statusBar');
+    const text = document.getElementById('statusText');
+    if (playing) {
+      bar.classList.add('playing');
+      text.textContent = 'Tocando: ' + note;
+    } else {
+      bar.classList.remove('playing');
+      text.textContent = 'Nenhum pad ativo';
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // CONSTRUÇÃO DO GRID (reutilizável)
+  // ─────────────────────────────────────────────
+  function buildGrid() {
+    const grid = document.getElementById('padGrid');
+    NOTES.forEach(note => {
+      const btn = document.createElement('button');
+      btn.className   = 'pad-btn';
+      btn.type        = 'button';
+      btn.textContent = note;
+      btn.setAttribute('aria-label', 'Pad ' + note);
+      btn.addEventListener('click', () => playPad(note, btn));
+      grid.appendChild(btn);
+    });
+  }
+
+  // ─────────────────────────────────────────────
+  // CONTROLE DE VOLUME
+  // ─────────────────────────────────────────────
+  function initVolume() {
+    const slider  = document.getElementById('volumeSlider');
+    const display = document.getElementById('volumeDisplay');
+
+    slider.addEventListener('input', () => {
+      const val = parseInt(slider.value, 10);
+      globalVolume = val / 100;
+
+      // Atualiza gradiente visual do slider via CSS custom property
+      slider.style.setProperty('--vol', val);
+      display.textContent = val + '%';
+
+      // Aplica rampa suave ao GainNode mestre (evita click de áudio)
+      if (masterGain) {
+        masterGain.gain.setTargetAtTime(globalVolume, audioCtx.currentTime, 0.05);
+      }
+    });
+  }
+
+  // ─────────────────────────────────────────────
+  // INICIALIZAÇÃO
+  // ─────────────────────────────────────────────
+  function init() {
+    buildGrid();
+    initVolume();
+    document.getElementById('stopBtn').addEventListener('click', stopAll);
+
+    // Pré-carrega áudios em background (fetch assíncrono, baixo impacto)
+    NOTES.forEach(note => preloadAudio(note));
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
 </script>
 
 </body>
